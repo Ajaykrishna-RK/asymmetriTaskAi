@@ -12,14 +12,17 @@ export function useSignupValidation() {
   const [errors, setErrors] = useState<Errors>({});
 
   const validate = (formData: FormData) => {
-    const name = formData.get("name") as string;
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+    const name = formData.get("name") as string | null;
+    const email = formData.get("email") as string | null;
+    const password = formData.get("password") as string | null;
 
     const newErrors: Errors = {};
 
-    if (!name || name.trim().length < 2) {
-      newErrors.name = "Name must be at least 2 characters";
+    // ✅ Validate name ONLY if it exists in the form
+    if (name !== null) {
+      if (!name.trim() || name.trim().length < 2) {
+        newErrors.name = "Name must be at least 2 characters";
+      }
     }
 
     if (!email) {
@@ -35,7 +38,6 @@ export function useSignupValidation() {
     }
 
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
