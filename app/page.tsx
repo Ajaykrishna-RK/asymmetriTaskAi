@@ -7,9 +7,11 @@ export default async function Home() {
     headers: await headers(),
   });
 
+
   if (!session) {
     redirect("/signin");
   }
+
 
   redirect("/chat");
 }
