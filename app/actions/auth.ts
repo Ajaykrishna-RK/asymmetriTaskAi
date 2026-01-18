@@ -8,6 +8,7 @@ export type AuthState = {
   error?: string;
 };
 
+
 export async function signUpAction(
   prevState: AuthState,
   formData: FormData
@@ -21,8 +22,13 @@ export async function signUpAction(
       body: { email, password, name },
     });
 
-    redirect("/");
+    redirect("/signin"); // ✅ this will now work
   } catch (error: any) {
+    // ✅ IMPORTANT: allow redirects to pass through
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
+
     return {
       error:
         error?.message ||
@@ -41,18 +47,32 @@ export async function signInAction(
 
     await auth.api.signInEmail({
       body: { email, password },
+      headers: await headers(),
     });
 
     redirect("/");
   } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
+
+    console.error("Sign-in error:", error);
     return { error: "Invalid email or password" };
   }
 }
 
 
 export async function signOutFunction() {
-  await auth.api.signOut({
-    headers: await headers(),
-  });
-  redirect("/");
+  try {
+    await auth.api.signOut({
+      headers: await headers(),
+    });
+
+    redirect("/");
+  } catch (error) {
+    console.error("Sign out failed:", error);
+
+
+    redirect("/signin");
+  }
 }
